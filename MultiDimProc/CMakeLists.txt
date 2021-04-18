@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.7)
 
-project(opencl_HelloWorld)
+project(opencl_MultiDimension)
 
 find_package(OpenCL REQUIRED)
 

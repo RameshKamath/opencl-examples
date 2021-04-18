@@ -14,11 +14,16 @@
 #include "cl_error.h"
 
 
-
 int main(int argc, char **argv)
 {
-    std::string kernelFunc = "__kernel void HelloWorld(__global char *data) { data[0] = 'H'; data[1] = 'e'; data[2] = 'l'; data[3] = 'l'; data[4] = 'o'; data[5] = ' '; data[6] = 'w'; data[7] = 'o'; data[8] = 'r'; data[9] = 'l'; data[10] = 'd'; data[11] = '!'; data[12] = '\\0';}";
-    
+    if(argc <3){
+        std::cout << "Usage: need externalKernel.cl path and kernel function." << std::endl;
+        return 1;
+    }
+
+    std::string path = argv[1];
+    std::string kernelFunc = argv[2];
+
     std::vector<cl::Platform> platforms;
 
     cl::Platform::get(&platforms);
@@ -28,7 +33,6 @@ int main(int argc, char **argv)
         std::cerr << "No Platforms Available!" << std::endl;
         return -1;
     }
-
     cl::Platform platform = platforms.front();
 
     std::vector<cl::Device> devices;
@@ -39,25 +43,29 @@ int main(int argc, char **argv)
         std::cerr << "No Devices Available!" << std::endl;
         return -1;
     }
-
     cl::Device device = devices.front();
 
-    cl::Program::Sources sources(1, std::make_pair(kernelFunc.c_str(), kernelFunc.length() + 1));
+    std::ifstream kernelFilename(path);
+    if(kernelFilename.is_open()){
 
-    cl::Context context(device);
+        std::string src(std::istreambuf_iterator<char>(kernelFilename), (std::istreambuf_iterator<char>()));
 
-    cl::Program program(context, sources);
+        cl::Program::Sources sources(1, std::make_pair(src.c_str(), src.length() + 1));
 
-    try {
-        cl_int err = program.build("-cl-std=CL1.2");
-        if (err != 0) {
+        cl::Context context(device);
+
+        cl::Program program(context, sources);
+
+        auto err = program.build("-cl-std=CL1.2");
+        if (err != 0){
             std::cerr << "error : " << clGetErrorString(err) << std::endl;
         }
+
         char buf[16];
 
         cl::Buffer memBuf(context, CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(buf));
 
-        cl::Kernel kernel(program, "HelloWorld", &err);
+        cl::Kernel kernel(program, kernelFunc.c_str(), &err);
         if(err != 0){
             std::cerr << "error : " << clGetErrorString(err) << std::endl;
         }
@@ -68,12 +76,11 @@ int main(int argc, char **argv)
         queue.enqueueTask(kernel);
         queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(buf), buf);
 
+
         std::cout << buf <<std::endl;
         std::cin.get();
     }
-    catch (std::exception &err) {
-        std::cerr << "error : " <<err.what() << std::endl;
+    else{
+        std::cout << "error : " << "Couldn't open opencl file" << std::endl;
     }
-
-
 }
