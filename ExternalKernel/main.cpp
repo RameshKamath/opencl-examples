@@ -11,18 +11,17 @@
 #include <fstream>
 #include <string>
 
-#include "cl_error.h"
-
+#include "cl_error/cl_error.h"
 
 int main(int argc, char **argv)
 {
-    if(argc <3){
-        std::cout << "Usage: need externalKernel.cl path and kernel function." << std::endl;
-        return 1;
+    std::string path = "./externalKernel.cl";
+    std::string kernelFunc = "HelloWorld";
+    if (argc > 1)
+    {
+        path = argv[1];
+        kernelFunc = argv[2];
     }
-
-    std::string path = argv[1];
-    std::string kernelFunc = argv[2];
 
     std::vector<cl::Platform> platforms;
 
@@ -46,7 +45,8 @@ int main(int argc, char **argv)
     cl::Device device = devices.front();
 
     std::ifstream kernelFilename(path);
-    if(kernelFilename.is_open()){
+    if (kernelFilename.is_open())
+    {
 
         std::string src(std::istreambuf_iterator<char>(kernelFilename), (std::istreambuf_iterator<char>()));
 
@@ -57,7 +57,8 @@ int main(int argc, char **argv)
         cl::Program program(context, sources);
 
         auto err = program.build("-cl-std=CL1.2");
-        if (err != 0){
+        if (err != 0)
+        {
             std::cerr << "error : " << clGetErrorString(err) << std::endl;
         }
 
@@ -66,7 +67,8 @@ int main(int argc, char **argv)
         cl::Buffer memBuf(context, CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(buf));
 
         cl::Kernel kernel(program, kernelFunc.c_str(), &err);
-        if(err != 0){
+        if (err != 0)
+        {
             std::cerr << "error : " << clGetErrorString(err) << std::endl;
         }
 
@@ -76,11 +78,13 @@ int main(int argc, char **argv)
         queue.enqueueTask(kernel);
         queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(buf), buf);
 
-
-        std::cout << buf <<std::endl;
+        std::cout << buf << std::endl;
         std::cin.get();
     }
-    else{
-        std::cout << "error : " << "Couldn't open opencl file" << std::endl;
+    else
+    {
+        std::cerr << "error : "
+                  << "Couldn't open or find opencl file" << std::endl;
+        std::clog << "Usage: <bin_location>/opencl_ExternalKernel <kernel_location>.cl <kernel_function_name>" << std::endl;
     }
 }

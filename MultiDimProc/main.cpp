@@ -12,13 +12,17 @@
 #include <string>
 #include <array>
 
-#include "cl_error.h"
+#include "cl_error/cl_error.h"
 
-std::string kernelFunc = "__kernel void ProcessMultiDimensionalArray(__global int *data){ size_t id = get_global_id(1) * get_global_size(0) + get_global_id(0); data[id] = data[id] * 2;}";
+std::string kernelFunc = std::string("\
+__kernel void ProcessMultiDimensionalArray(__global int *data){\
+    size_t id = get_global_id(1) * get_global_size(0) + get_global_id(0);\
+    data[id] = data[id] * 2;\
+}\
+");
 
 int main(int argc, char **argv)
 {
-
     std::vector<cl::Platform> platforms;
 
     cl::Platform::get(&platforms);
@@ -50,16 +54,17 @@ int main(int argc, char **argv)
     if (err != 0)
         std::cerr << "error : " << clGetErrorString(err) << std::endl;
 
-    //int arr[3][2];
+    // int arr[3][2];
     const int numRows = 3;
     const int numCols = 2;
     const int count = numRows * numCols;
-    std::array<std::array<int, numCols>, numRows> arr = { {{1,1},{2,2},{3,3}} };
+    std::array<std::array<int, numCols>, numRows> arr = {{{1, 1}, {2, 2}, {3, 3}}};
 
     cl::Buffer memBuf(context, CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * count, arr.data());
 
     cl::Kernel kernel(program, "ProcessMultiDimensionalArray", &err);
-    if(err != 0){
+    if (err != 0)
+    {
         std::cerr << "error : " << clGetErrorString(err) << std::endl;
     }
 
@@ -67,12 +72,14 @@ int main(int argc, char **argv)
 
     cl::CommandQueue queue(context, device);
 
-    queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(2,3));
+    queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(2, 3));
     queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(int) * count, arr.data());
 
-    for(int i = 0; i < numRows; i++){
-        for(int j = 0; j< numCols; j++){
-            std::cout << arr[i][j] <<" "<< std::endl;
+    for (int i = 0; i < numRows; i++)
+    {
+        for (int j = 0; j < numCols; j++)
+        {
+            std::cout << arr[i][j] << " " << std::endl;
         }
     }
     std::cin.get();

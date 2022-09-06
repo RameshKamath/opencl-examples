@@ -10,8 +10,7 @@
 #include <iostream>
 #include <string>
 
-#include "cl_error.h"
-
+#include "cl_error/cl_error.h"
 
 int main(int argc, char **argv)
 {
@@ -28,7 +27,8 @@ int main(int argc, char **argv)
     std::cout << "Number of Platform Available: " << platforms.size() << std::endl;
 
     std::string platformVendor;
-    for (cl::Platform platform : platforms){
+    for (cl::Platform platform : platforms)
+    {
         platform.getInfo((cl_platform_info)CL_PLATFORM_VENDOR, &platformVendor);
         std::cout << "Platform is by: " << platformVendor << std::endl;
 
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
             std::string vendor = device.getInfo<CL_DEVICE_VENDOR>();
             std::string version = device.getInfo<CL_DEVICE_VERSION>();
 
-            std::cout << " Device No: "<< i <<" vendor: " << vendor << ", version: " << version << std::endl;
+            std::cout << " Device No: " << i << " vendor: " << vendor << ", version: " << version << std::endl;
             i++;
         }
     }
