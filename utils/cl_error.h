@@ -1,3 +1,5 @@
+#pragma once
+
 const char *clGetErrorString(int errorCode)
 {
     switch (errorCode)

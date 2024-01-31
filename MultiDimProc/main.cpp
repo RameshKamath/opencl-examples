@@ -1,18 +1,10 @@
 
-#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
-#define __CL_ENABLE_EXCEPTIONS
-
-#if defined(__APPLE__) || defined(__MACOSX)
-#include <OpenCL/cl.hpp>
-#else
-#include <CL/cl.hpp>
-#endif
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <array>
 
-#include "cl_error/cl_error.h"
+#include <utils/cl_helper.hpp>
 
 std::string kernelFunc = std::string("\
 __kernel void ProcessMultiDimensionalArray(__global int *data){\

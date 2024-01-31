@@ -1,27 +1,28 @@
-
-#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
-#define __CL_ENABLE_EXCEPTIONS
-
-#if defined(__APPLE__) || defined(__MACOSX)
-#include <OpenCL/cl.hpp>
-#else
-#include <CL/cl.hpp>
-#endif
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <filesystem>
 
-#include "cl_error/cl_error.h"
+#include <utils/cl_helper.hpp>
 
 int main(int argc, char **argv)
 {
-    std::string path = "./externalKernel.cl";
-    std::string kernelFunc = "HelloWorld";
+    std::string kernelPath;
+    std::string kernelFunc;
     if (argc > 1)
     {
-        path = argv[1];
+        kernelPath = argv[1];
         kernelFunc = argv[2];
     }
+    else
+    {
+        std::cout << "Trying with default Kernelfile and Fucnction" << std::endl;
+        std::string parent_path = std::filesystem::weakly_canonical(std::filesystem::path(argv[0])).parent_path();
+        kernelPath = parent_path + "/externalKernel.cl";
+        kernelFunc = "HelloWorld";
+    }
+    std::cout << "Using kernel in path: " << kernelPath << std::endl;
+    std::cout << "with function name: " << kernelFunc << std::endl;
 
     std::vector<cl::Platform> platforms;
 
@@ -44,7 +45,7 @@ int main(int argc, char **argv)
     }
     cl::Device device = devices.front();
 
-    std::ifstream kernelFilename(path);
+    std::ifstream kernelFilename(kernelPath);
     if (kernelFilename.is_open())
     {
 

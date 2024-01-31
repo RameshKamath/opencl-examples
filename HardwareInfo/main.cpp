@@ -1,16 +1,9 @@
 
-#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
-#define __CL_ENABLE_EXCEPTIONS
-
-#if defined(__APPLE__) || defined(__MACOSX)
-#include <OpenCL/cl.hpp>
-#else
-#include <CL/cl.hpp>
-#endif
 #include <iostream>
 #include <string>
+#include <vector>
 
-#include "cl_error/cl_error.h"
+#include <utils/cl_helper.hpp>
 
 int main(int argc, char **argv)
 {
